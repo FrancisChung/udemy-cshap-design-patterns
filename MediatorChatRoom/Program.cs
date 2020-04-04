@@ -31,7 +31,7 @@ namespace MediatorChatRoom
     public class Person
     {
         public string Name;
-        public ChatRoom room;
+        public ChatRoom Room;
         private List<string> chatLog = new List<string>();
 
         public Person(string name)
@@ -41,12 +41,12 @@ namespace MediatorChatRoom
 
         public void Say(string message)
         {
-            room.Broadcast(Name, message);
+            Room.Broadcast(Name, message);
         }
 
         public void PrivateMessage(string who, string message)
         {
-            room.Message(Name, who, message);
+            Room.Message(Name, who, message);
         }
 
         public void Receive(string sender, string message)
@@ -64,10 +64,10 @@ namespace MediatorChatRoom
 
         public void Join(Person p)
         {
-            p.room = this;
+            p.Room = this;
 
-            string joinMsg = $"{p.Name} has joined the room";
-            Broadcast("room", joinMsg);
+            string joinMsg = $"{p.Name} has joined the Room";
+            Broadcast("Room", joinMsg);
         }
 
         public void Broadcast(string source, string message)
