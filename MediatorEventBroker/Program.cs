@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reflection.Metadata;
+using System.Security.Cryptography.X509Certificates;
 
 namespace MediatorEventBroker
 {
@@ -16,9 +18,30 @@ namespace MediatorEventBroker
 
     public class FootballPlayer : Actor
     {
-        public FootballPlayer(EventBroker broker) : base(broker)
+
+        public string Name { get; set; }
+
+        public FootballPlayer(EventBroker broker, string name) : base(broker)
         {
-            
+            Name = name ?? throw new ArgumentNullException(paramName: nameof(name));
+
+            broker.OfType<PlayerScoredEvent>()
+                .Where(ps => !ps.Name.Equals(name))
+                .Subscribe(
+                pe =>
+                {
+                    Console.WriteLine($"{name} : Nicely done {pe.Name}, it's your {pe.GoalsScored}");
+                }
+            );
+
+            broker.OfType<PlayerSentOffEvent>()
+                .Where(ps => !ps.Name.Equals(name))
+                .Subscribe(
+                    pe =>
+                    {
+                        Console.WriteLine($"{name} : See you in the lockers, {pe.Name}");
+                    }
+                );
         }
     }
 
