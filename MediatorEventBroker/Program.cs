@@ -26,6 +26,23 @@ namespace MediatorEventBroker
     {
         public FootballCoach(EventBroker broker) : base(broker)
         {
+            broker.OfType<PlayerScoredEvent>()
+                .Subscribe(
+                    pe =>
+                    {
+                        if (pe.GoalsScored < 3)
+                            Console.WriteLine($"Coach : Well done, {pe.Name}!");
+                    }
+                );
+
+            broker.OfType<PlayerSentOffEvent>()
+                .Subscribe(
+                    pe =>
+                    {
+                        if (pe.Reason == "Violence")
+                            Console.WriteLine($"Coach : How could you, {pe.Name}?!?!");
+                    }
+                );
         }
     }
 
@@ -34,12 +51,12 @@ namespace MediatorEventBroker
         public string Name { get; set; }
     }
 
-    public class PlayerScoredEvent
+    public class PlayerScoredEvent : PlayerEvent
     {
         public int GoalsScored { get; set; }
     }
 
-    public class PlayerSentOffEvent
+    public class PlayerSentOffEvent : PlayerEvent
     {
         public string Reason { get; set; }        
     }
