@@ -24,6 +24,8 @@ namespace MediatorChatRoom
            room.Join(simon);
 
            simon.Say("Hello everyone");
+
+           jane.PrivateMessage("Simon", "Glad you could join us, Simon");
            Console.ReadKey();
         }
     }
@@ -65,6 +67,7 @@ namespace MediatorChatRoom
         public void Join(Person p)
         {
             p.Room = this;
+            people.Add(p);
 
             string joinMsg = $"{p.Name} has joined the Room";
             Broadcast("Room", joinMsg);
