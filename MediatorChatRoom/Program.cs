@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks.Dataflow;
 
 namespace MediatorChatRoom
 {
@@ -23,10 +26,14 @@ namespace MediatorChatRoom
         }
 
         public void Say(string message)
-        { }
+        {
+            room.Broadcast(Name, message);
+        }
 
         public void PrivateMessage(string who, string message)
-        { }
+        {
+            room.Message(Name, who, message);
+        }
 
         public void Receive(string sender, string message)
         {
@@ -39,6 +46,26 @@ namespace MediatorChatRoom
 
     public class ChatRoom
     {
+        private List<Person> people = new List<Person>();
 
+        public void Join(Person p)
+        {
+            string joinMsg = $"{p.Name} has joined the room";
+            Broadcast("room", joinMsg);
+        }
+
+        public void Broadcast(string source, string message)
+        {
+            foreach (var p in people)
+            {
+                if (p.Name != source)
+                    p.Receive(source, message);
+            }
+        }
+
+        public void Message(string source, string destination,  string message)
+        {
+            people.FirstOrDefault(p=> p.Name == destination)?.Receive(source, message);
+        }
     }
 }
