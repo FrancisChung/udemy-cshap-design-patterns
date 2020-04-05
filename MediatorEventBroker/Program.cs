@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autofac;
+using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection.Metadata;
@@ -20,7 +21,8 @@ namespace MediatorEventBroker
     {
 
         public string Name { get; set; }
-
+        public int GoalsScored { get; set; }
+        
         public FootballPlayer(EventBroker broker, string name) : base(broker)
         {
             Name = name ?? throw new ArgumentNullException(paramName: nameof(name));
@@ -42,6 +44,17 @@ namespace MediatorEventBroker
                         Console.WriteLine($"{name} : See you in the lockers, {pe.Name}");
                     }
                 );
+        }
+
+        public void Score()
+        {
+            GoalsScored++;
+            broker.Publish(new PlayerScoredEvent { GoalsScored = GoalsScored, Name = Name });
+        }
+
+        public void AssaultReferee()
+        {
+            broker.Publish(new PlayerSentOffEvent{Name = Name, Reason = "Violence"});
         }
     }
 
@@ -104,7 +117,30 @@ namespace MediatorEventBroker
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var cb = new ContainerBuilder();
+            cb.RegisterType<EventBroker>().SingleInstance();
+            cb.RegisterType<FootballCoach>();
+            cb.Register((c, p) =>
+                new FootballPlayer(
+                    c.Resolve<EventBroker>(),
+                    p.Named<string>("name")
+                ));
+
+            using (var c = cb.Build())
+            {
+                var coach = c.Resolve<FootballCoach>();
+                var player1 = c.Resolve<FootballPlayer>(new NamedParameter("name", "John"));
+                var player2 = c.Resolve<FootballPlayer>(new NamedParameter("name", "Chris"));
+
+                player1.Score();
+                player1.Score();
+                player1.Score();
+
+                player1.AssaultReferee();
+
+                player2.Score();
+
+            }
         }
     }
 }
